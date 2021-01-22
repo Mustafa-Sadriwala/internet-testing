@@ -1,0 +1,27 @@
+#! /bin/bash
+cd ~/Desktop/internet-testing
+count=0;
+start_time=$(date)
+start_time_unix=$(date '+%s')
+curr_time=start_time_unix
+echo -e "${start_time}\n" >> output.csv
+while [ $[$curr_time - $start_time_unix] -lt 14400 ]
+do
+	fast_output="$(./fast)"
+	fast_format1="$( echo -e "${fast_output}" | sed -n 's/.*->//p' | tr -d '[:space:]')"
+	fast_format2="$(echo -e "${fast_format1}" | grep -Eo '[+-]?[0-9]+([.][0-9]+)?')"
+	#echo -e "'${fast_format1}'"
+	echo -e "${fast_format1}"
+	curr_time=$(date '+%s')
+	echo -e -n "${curr_time}, " >> outputTimes.csv
+	if [ -z "${fast_format2}" ]
+	then
+		echo -e "ERROR?" >> log.txt
+		echo -e "time: ${curr_time}" >> log.txt
+		echo -e "output: ${fast_output}\n" >> log.txt
+		echo -e -n "0, " >> output.csv
+	else
+		echo -e -n "${fast_format2}, " >> output.csv
+	fi
+	count=$[$count + 1];
+done
